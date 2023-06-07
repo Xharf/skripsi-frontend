@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from "react";
 const videoConstraints = {
 	width: 256,
 	height: 256,
-	facingMode: { exact: "environment" },
+	facingMode: "environment",
 };
 
 export default function Identify() {
@@ -35,7 +35,7 @@ export default function Identify() {
 				>
 					{({ getScreenshot }) => {
 						setInterval(() => {
-							const imageSrc = getScreenshot({ width: 256, height: 256 });
+							const imageSrc = getScreenshot();
 							fetch(`${process.env.BASE_URL}/predict64`, {
 								method: "POST",
 								headers: {
