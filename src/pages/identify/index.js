@@ -35,7 +35,7 @@ export default function Identify() {
 				>
 					{({ getScreenshot }) => {
 						setInterval(() => {
-							const imageSrc = getScreenshot();
+							const imageSrc = getScreenshot({ width: 1080, height: 1080 });
 							fetch(`${process.env.BASE_URL}/predict64`, {
 								method: "POST",
 								headers: {
