@@ -17,7 +17,7 @@ import { useEffect, useRef, useState } from "react";
 const videoConstraints = {
 	width: 256,
 	height: 256,
-	facingMode: "user",
+	facingMode: { exact: "environment" },
 };
 
 export default function Identify() {
