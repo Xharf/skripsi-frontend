@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 import {
 	Accordion,
 	AccordionDetails,
@@ -10,6 +12,7 @@ import {
 import WestRoundedIcon from "@mui/icons-material/WestRounded";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Webcam from "react-webcam";
+import { useEffect, useRef, useState } from "react";
 
 const videoConstraints = {
 	width: 256,
@@ -18,6 +21,8 @@ const videoConstraints = {
 };
 
 export default function Identify() {
+	const [src, setSrc] = useState(null);
+
 	return (
 		<>
 			<Box sx={{ borderRadius: "20px", mt: 3 }}>
@@ -31,14 +36,38 @@ export default function Identify() {
 					{({ getScreenshot }) => {
 						setInterval(() => {
 							const imageSrc = getScreenshot({ width: 256, height: 256 });
-							console.log(imageSrc);
-						}, 1000);
+							fetch(`${process.env.BASE_URL}/predict64`, {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({ imgbase64: imageSrc }),
+							})
+								.then((response) => response.blob())
+								.then((blob) => {
+									setSrc(URL.createObjectURL(blob));
+								})
+								.catch((error) => {
+									console.error("Error:", error);
+								});
+							return () => clearInterval(requestData);
+						}, 10000);
 					}}
 				</Webcam>
 			</Box>
-			<Typography variant="body1" fontSize={20} mt={3} mb={1}>
+			<Typography variant="body1" fontSize={20} mt={3}>
 				Instance yang terdeteksi:
 			</Typography>
+			<Grid container sx={{ borderRadius: "20px", justifyContent: "center" }}>
+				<Grid item xs={10}>
+					<img style={{ borderRadius: "20px" }} src={src} width="100%"></img>
+				</Grid>
+			</Grid>
+
+			<Typography variant="body1" fontSize={20} mt={3} mb={1}>
+				Daftar:
+			</Typography>
+
 			<Accordion sx={{ "&.MuiPaper-root": { borderRadius: "30px" } }}>
 				<AccordionSummary
 					sx={{ borderRadius: "30px", background: "#83BD75", color: "black" }}
