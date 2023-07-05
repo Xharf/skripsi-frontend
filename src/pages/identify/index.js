@@ -1,39 +1,118 @@
-require("dotenv").config();
+require("dotenv").config()
 
 import {
 	Accordion,
 	AccordionDetails,
 	AccordionSummary,
+	Avatar,
 	Box,
 	Button,
+	Container,
 	Grid,
+	Stack,
 	Typography,
-} from "@mui/material";
-import WestRoundedIcon from "@mui/icons-material/WestRounded";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Webcam from "react-webcam";
-import { useEffect, useRef, useState } from "react";
+} from "@mui/material"
+import WestRoundedIcon from "@mui/icons-material/WestRounded"
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore"
+import Webcam from "react-webcam"
+import { useCallback, useContext, useEffect, useRef, useState } from "react"
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded"
+import Link from "next/link"
+import CollectionsRoundedIcon from "@mui/icons-material/CollectionsRounded"
+import FlipCameraAndroidRoundedIcon from "@mui/icons-material/FlipCameraAndroidRounded"
+import CameraRoundedIcon from "@mui/icons-material/CameraRounded"
+import { useRouter } from "next/router"
+import { IdentifyContext } from "../../../context/IdentifyContext"
 
-const videoConstraints = {
-	width: 256,
-	height: 256,
-	facingMode: "environment",
-};
+// export async function getServerSideProps(context) {
+// 	const data = JSON.parse(context.query.data)
+// }
 
 export default function Identify() {
-	const [src, setSrc] = useState(null);
+	const { setIdentify } = useContext(IdentifyContext)
+	const webcamRef = useRef(null)
+	const capture = useCallback(() => {
+		return webcamRef.current.getScreenshot()
+	}, [webcamRef])
+	const router = useRouter()
+	const [facingMode, setFacingMode] = useState("environment")
+
+	const videoConstraints = {
+		height: 720,
+		facingMode: facingMode,
+	}
+
+	function changeFacingMode() {
+		if (facingMode == "environment") {
+			setFacingMode("user")
+		} else {
+			setFacingMode("environment")
+		}
+	}
+
+	const handleIdentify = () => {
+		const imageSrc = capture()
+		fetch(`${process.env.BASE_URL}/predict64`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ imgbase64: imageSrc }),
+		})
+			.then((response) => response.json())
+			.then(({ data }) => {
+				const diseasesOutput = data.class.reduce((result, item, index) => {
+					const existingItem = result.find((obj) => obj.name === item)
+					if (existingItem) {
+						existingItem.score.push(data.score[index])
+					} else {
+						result.push({ name: item, score: [data.score[index]] })
+					}
+					return result
+				}, [])
+
+				setIdentify({
+					imgSrc: `data:image/jpeg;base64,${data.image}`,
+					diseases: diseasesOutput,
+					originalImage: imageSrc,
+				})
+
+				router.push({
+					pathname: "/identify/result",
+					// query: JSON.stringify({
+					// 	imgSrc: `data:image/jpeg;base64,${data.image}`,
+					// 	diseases: diseasesOutput,
+					// }),
+				})
+			})
+			.catch((error) => {
+				console.error("Error:", error)
+			})
+	}
 
 	return (
 		<>
-			<Box sx={{ borderRadius: "20px", mt: 3 }}>
-				<Webcam
-					style={{ borderRadius: "20px" }}
-					audio={false}
-					width="100%"
-					videoConstraints={videoConstraints}
-					screenshotFormat="image/jpeg"
-				>
-					{({ getScreenshot }) => {
+			<Box mt={2}>
+				<Link href="/">
+					<Stack direction="row" alignItems="center" gap={1}>
+						<ArrowBackRoundedIcon></ArrowBackRoundedIcon>
+						<Typography variant="body1" fontSize={24} fontWeight="bold">
+							Back to home
+						</Typography>
+					</Stack>
+				</Link>
+			</Box>
+			<Box position="relative">
+				<Box sx={{ borderRadius: "20px", mt: 3 }}>
+					<Webcam
+						style={{ borderRadius: "20px" }}
+						ref={webcamRef}
+						audio={false}
+						width="100%"
+						screenshotFormat="image/jpeg"
+						videoConstraints={videoConstraints}
+					>
+						{/* {({ getScreenshot }) => {
 						setInterval(() => {
 							const imageSrc = getScreenshot({ width: 1080, height: 1080 });
 							fetch(`${process.env.BASE_URL}/predict64`, {
@@ -52,58 +131,53 @@ export default function Identify() {
 								});
 							return () => clearInterval(requestData);
 						}, 10000);
+					}} */}
+					</Webcam>
+				</Box>
+				<Container
+					sx={{
+						position: { xs: "absolute", lg: "relative" },
+						my: { xs: 3, lg: 1 },
+						bottom: 0,
 					}}
-				</Webcam>
-			</Box>
-			<Typography variant="body1" fontSize={20} mt={3}>
-				Instance yang terdeteksi:
-			</Typography>
-			<Grid container sx={{ borderRadius: "20px", justifyContent: "center" }}>
-				<Grid item xs={10}>
-					<img style={{ borderRadius: "20px" }} src={src} width="100%"></img>
-				</Grid>
-			</Grid>
-
-			<Typography variant="body1" fontSize={20} mt={3} mb={1}>
-				Daftar:
-			</Typography>
-
-			<Accordion sx={{ "&.MuiPaper-root": { borderRadius: "30px" } }}>
-				<AccordionSummary
-					sx={{ borderRadius: "30px", background: "#83BD75", color: "black" }}
-					expandIcon={<ExpandMoreIcon sx={{ color: "black" }} />}
 				>
-					<Typography>Accordion 1</Typography>
-				</AccordionSummary>
-				<AccordionDetails>
-					<Typography>
-						Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse
-						malesuada lacus ex, sit amet blandit leo lobortis eget.
-					</Typography>
-				</AccordionDetails>
-			</Accordion>
-			<Button
-				variant="contained"
-				startIcon={<WestRoundedIcon />}
-				sx={{
-					background: "#83BD75",
-					borderRadius: "30px",
-					mt: 5,
-					mb: 5,
-					textTransform: "none",
-					color: "black",
-				}}
-				fullWidth
-				size="large"
-			>
-				<Grid height={60} container justifyContent="center" alignItems="center">
-					<Grid item xs={12}>
-						<Typography variant="body1" fontSize={18}>
-							Sudah selesai? Kembali
-						</Typography>
+					<Grid container justifyContent="center">
+						<Grid
+							item
+							xs={4}
+							container
+							justifyContent="center"
+							alignContent="center"
+						>
+							<Avatar sx={{ width: 60, height: 60 }}>
+								<CollectionsRoundedIcon></CollectionsRoundedIcon>
+							</Avatar>
+						</Grid>
+						<Grid item xs={4} container justifyContent="center">
+							<Avatar
+								sx={{ width: 80, height: 80, bgcolor: "#83BD75" }}
+								onClick={() => handleIdentify()}
+							>
+								<CameraRoundedIcon sx={{ fontSize: 40 }}></CameraRoundedIcon>
+							</Avatar>
+						</Grid>
+						<Grid
+							item
+							xs={4}
+							container
+							justifyContent="center"
+							alignContent="center"
+						>
+							<Avatar
+								sx={{ width: 60, height: 60 }}
+								onClick={() => changeFacingMode()}
+							>
+								<FlipCameraAndroidRoundedIcon></FlipCameraAndroidRoundedIcon>
+							</Avatar>
+						</Grid>
 					</Grid>
-				</Grid>
-			</Button>
+				</Container>
+			</Box>
 		</>
-	);
+	)
 }

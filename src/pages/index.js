@@ -1,10 +1,11 @@
-import Hero from "@/components/Hero";
-import { Box, Button, Grid, Typography } from "@mui/material";
-import { Inter } from "next/font/google";
-import Carousel from "react-material-ui-carousel";
-const inter = Inter({ subsets: ["latin"] });
-import EastRoundedIcon from "@mui/icons-material/EastRounded";
-import CameraAltRoundedIcon from "@mui/icons-material/CameraAltRounded";
+import Hero from "@/components/Hero"
+import { Box, Button, Grid, Typography } from "@mui/material"
+import { Inter } from "next/font/google"
+import Carousel from "react-material-ui-carousel"
+const inter = Inter({ subsets: ["latin"] })
+import EastRoundedIcon from "@mui/icons-material/EastRounded"
+import CameraAltRoundedIcon from "@mui/icons-material/CameraAltRounded"
+import Router from "next/router"
 export default function Home() {
 	let item = [
 		{
@@ -19,7 +20,7 @@ export default function Home() {
 			url: "./images/hero/hero3.jpg",
 			alt: "Daun hero3",
 		},
-	];
+	]
 	return (
 		<>
 			<Box mt={2} mb={3}>
@@ -46,6 +47,9 @@ export default function Home() {
 					color: "black",
 				}}
 				fullWidth
+				onClick={() => {
+					Router.push("/identify")
+				}}
 			>
 				<Grid container py={1} spacing={2}>
 					<Grid item xs={4}>
@@ -81,5 +85,5 @@ export default function Home() {
 				</Grid>
 			</Button>
 		</>
-	);
+	)
 }
