@@ -1,25 +1,26 @@
 {
-  "name": "frontend-skripsi",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.11.0",
-    "@emotion/styled": "^11.11.0",
-    "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.13.3",
-    "dotenv": "^16.1.4",
-    "eslint": "8.42.0",
-    "eslint-config-next": "13.4.4",
-    "next": "13.4.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "react-material-ui-carousel": "^3.4.2",
-    "react-webcam": "^7.1.0"
-  }
+	"name": "frontend-skripsi",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"start-prod": "next start -p 8080",
+		"lint": "next lint"
+	},
+	"dependencies": {
+		"@emotion/react": "^11.11.0",
+		"@emotion/styled": "^11.11.0",
+		"@mui/icons-material": "^5.11.16",
+		"@mui/material": "^5.13.3",
+		"dotenv": "^16.1.4",
+		"eslint": "8.42.0",
+		"eslint-config-next": "13.4.4",
+		"next": "13.4.4",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"react-material-ui-carousel": "^3.4.2",
+		"react-webcam": "^7.1.0"
+	}
 }
