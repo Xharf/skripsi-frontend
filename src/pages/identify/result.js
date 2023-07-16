@@ -41,7 +41,7 @@ export default function Result() {
 	return (
 		<>
 			<Box mt={2}>
-				<Link href="/">
+				<Link href="/identify">
 					<Stack direction="row" alignItems="center" gap={1}>
 						<ArrowBackRoundedIcon></ArrowBackRoundedIcon>
 						<Typography variant="body1" fontSize={24} fontWeight="bold">

@@ -23,7 +23,7 @@ import FlipCameraAndroidRoundedIcon from "@mui/icons-material/FlipCameraAndroidR
 import CameraRoundedIcon from "@mui/icons-material/CameraRounded"
 import { useRouter } from "next/router"
 import { IdentifyContext } from "../../../context/IdentifyContext"
-
+import { BounceLoader } from "react-spinners"
 // export async function getServerSideProps(context) {
 // 	const data = JSON.parse(context.query.data)
 // }
@@ -36,6 +36,8 @@ export default function Identify() {
 	}, [webcamRef])
 	const router = useRouter()
 	const [facingMode, setFacingMode] = useState("environment")
+	const [loading, setLoading] = useState(false)
+	const [imgSrc, setImgSrc] = useState(null)
 
 	const videoConstraints = {
 		height: 720,
@@ -51,7 +53,9 @@ export default function Identify() {
 	}
 
 	const handleIdentify = () => {
+		setLoading(true)
 		const imageSrc = capture()
+		setImgSrc(imageSrc)
 		fetch(`${process.env.BASE_URL}/predict64`, {
 			method: "POST",
 			headers: {
@@ -84,6 +88,7 @@ export default function Identify() {
 					// 	diseases: diseasesOutput,
 					// }),
 				})
+				setLoading(true)
 			})
 			.catch((error) => {
 				console.error("Error:", error)
@@ -103,40 +108,30 @@ export default function Identify() {
 				</Link>
 			</Box>
 			<Box position="relative">
-				<Box sx={{ borderRadius: "20px", mt: 3 }}>
-					<Webcam
-						style={{ borderRadius: "20px" }}
-						ref={webcamRef}
-						audio={false}
-						width="100%"
-						screenshotFormat="image/jpeg"
-						videoConstraints={videoConstraints}
-					>
-						{/* {({ getScreenshot }) => {
-						setInterval(() => {
-							const imageSrc = getScreenshot({ width: 1080, height: 1080 });
-							fetch(`${process.env.BASE_URL}/predict64`, {
-								method: "POST",
-								headers: {
-									"Content-Type": "application/json",
-								},
-								body: JSON.stringify({ imgbase64: imageSrc }),
-							})
-								.then((response) => response.blob())
-								.then((blob) => {
-									setSrc(URL.createObjectURL(blob));
-								})
-								.catch((error) => {
-									console.error("Error:", error);
-								});
-							return () => clearInterval(requestData);
-						}, 10000);
-					}} */}
-					</Webcam>
+				<Box position="relative" sx={{ borderRadius: "20px", mt: 3 }}>
+					{/* show iamge while loading and hide webcam */}
+					{loading && <img style={{ borderRadius: "20px" }} src={imgSrc}></img>}
+					{!loading && (
+						<Webcam
+							style={{ borderRadius: "20px" }}
+							ref={webcamRef}
+							audio={false}
+							width="100%"
+							screenshotFormat="image/jpeg"
+							videoConstraints={videoConstraints}
+						></Webcam>
+					)}
+					<Container sx={{ position: "absolute", top: 30 }}>
+						<Grid container justifyContent="center">
+							<Grid item>
+								<BounceLoader color="white" loading={loading} size={"30vw"} />
+							</Grid>
+						</Grid>
+					</Container>
 				</Box>
 				<Container
 					sx={{
-						position: { xs: "absolute", lg: "relative" },
+						position: { xs: loading ? "relative" : "absolute", lg: "relative" },
 						my: { xs: 3, lg: 1 },
 						bottom: 0,
 					}}
